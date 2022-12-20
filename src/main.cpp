@@ -53,11 +53,17 @@ int main() {
   glGenVertexArrays(1, &vertex_array_id);
   glBindVertexArray(vertex_array_id);
 
-  GLuint programID = LoadShaders("../shaders/vertex_shader.vertexshader",
+  GLuint shader_id = LoadShaders("../shaders/vertex_shader.vertexshader",
                                  "../shaders/fragment_shader.fragmentshader");
 
-  GLuint view_id = glGetUniformLocation(programID, "V");
-  GLuint projection_id = glGetUniformLocation(programID, "P");
+  GLuint view_id = glGetUniformLocation(shader_id, "V");
+  GLuint projection_id = glGetUniformLocation(shader_id, "P");
+
+  GLuint red_shader_id = LoadShaders("../shaders/red_vertex_shader.vertexshader",
+                                 "../shaders/fragment_shader.fragmentshader");
+
+  GLuint red_view_id = glGetUniformLocation(red_shader_id, "V");
+  GLuint red_projection_id = glGetUniformLocation(red_shader_id, "P");
 
   glm::mat4 view;
   glm::mat4 projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
@@ -65,48 +71,14 @@ int main() {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
 
-//  static const Vertex vertices[] = {
-//      {{-1.0f, -1.0f, -1.0f}, {0.0, 0.0, 0.5, 0.5}},
-//      {{1.0f, -1.0f, 1.0f}, {0.0, 0.0, 0.5, 0.5}},
-//      {{0.0f,  1.0f, 0.0f}, {0.5, 0.0, 0.5, 0.5}},
-//
-//      {{0.0f, 1.0f, 1.0f}, {0.0, 0.5, 0.25, 0.5}},
-//      {{0.0f, 1.0f, -1.0f}, {0.0, 0.5, 0.0, 0.5}},
-//      {{0.0f, -1.0f, 0.0f}, {0.75, 0.5, 0.0, 0.5}}
-//  };
-
   static const Vertex vertices[] = {
-      {{-1.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 1.0}},
-      {{-1.0, 0.0, -1.0}, {0.0, 1.0, 0.0, 1.0}},
-      {{0.0, 2.0, 0.0}, {0.0, 0.0, 1.0, 1.0}},
+      {{-1.0f, -1.0f, -1.0f}, {0.0, 0.0, 0.5, 0.5}},
+      {{1.0f, -1.0f, 1.0f}, {0.0, 0.0, 0.5, 0.5}},
+      {{0.0f,  1.0f, 0.0f}, {0.5, 0.0, 0.5, 0.5}},
 
-      {{-1.0, 0.0, -1.0}, {0.0, 1.0, 0.0, 1.0}},
-      {{1.0, 0.0, -1.0}, {1.0, 0.0, 0.0, 1.0}},
-      {{0.0, 2.0, 0.0}, {0.0, 0.0, 1.0, 1.0}},
-
-      {{1.0, 0.0, -1.0}, {1.0, 0.0, 0.0, 1.0}},
-      {{1.0, 0.0, 1.0}, {0.0, 1.0, 0.0, 1.0}},
-      {{0.0, 2.0, 0.0}, {0.0, 0.0, 1.0, 1.0}},
-
-      {{1.0, 0.0, 1.0}, {0.0, 1.0, 0.0, 1.0}},
-      {{-1.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 1.0}},
-      {{0.0, 2.0, 0.0}, {0.0, 0.0, 1.0, 1.0}},
-
-      {{-1.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 1.0}},
-      {{0.0, -2.0, 0.0}, {0.0, 0.0, 1.0, 1.0}},
-      {{-1.0, 0.0, -1.0}, {0.0, 1.0, 0.0, 1.0}},
-
-      {{-1.0, 0.0, -1.0}, {0.0, 1.0, 0.0, 1.0}},
-      {{0.0, -2.0, 0.0}, {0.0, 0.0, 1.0, 1.0}},
-      {{1.0, 0.0, -1.0}, {1.0, 0.0, 0.0, 1.0}},
-
-      {{1.0, 0.0, -1.0}, {1.0, 0.0, 0.0, 1.0}},
-      {{0.0, -2.0, 0.0}, {0.0, 0.0, 1.0, 1.0}},
-      {{1.0, 0.0, 1.0}, {0.0, 1.0, 0.0, 1.0}},
-
-      {{1.0, 0.0, 1.0}, {0.0, 1.0, 0.0, 1.0}},
-      {{0.0, -2.0, 0.0}, {0.0, 0.0, 1.0, 1.0}},
-      {{-1.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 1.0}}
+      {{0.0f, 1.0f, 1.0f}, {0.0, 1.0, 0.25, 0.5}},
+      {{0.0f, 1.0f, -1.0f}, {0.0, 1.0, 0.0, 0.5}},
+      {{0.0f, -1.0f, 0.0f}, {0.75, 1.0, 0.0, 0.5}}
   };
 
   GLuint vertex_buffer_id;
@@ -115,10 +87,9 @@ int main() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices),
                vertices, GL_STATIC_DRAW);
 
-  glUseProgram(programID);
+  glUseProgram(shader_id);
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
 
-  glUniformMatrix4fv(projection_id, 1, GL_FALSE, glm::value_ptr(projection));
 
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(
@@ -142,15 +113,37 @@ int main() {
 
   auto angle = 0.0f;
   auto dist = 10.0f;
+
+  bool space_released = true;
+  bool is_red = false;
+
   do {
     angle += 0.04f;
     view = glm::lookAt(glm::vec3(dist * std::cos(angle), 4, dist * std::sin(angle)), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-    glUniformMatrix4fv(view_id, 1, GL_FALSE, glm::value_ptr(view));
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(Vertex));
     glfwSwapBuffers(window);
     glfwPollEvents();
+
+    if (!space_released && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
+      space_released = true;
+
+    if (space_released && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    {
+      is_red = !is_red;
+      space_released = false;
+    }
+
+    if (is_red) {
+      glUseProgram(red_shader_id);
+      glUniformMatrix4fv(red_view_id, 1, GL_FALSE, glm::value_ptr(view));
+      glUniformMatrix4fv(red_projection_id, 1, GL_FALSE, glm::value_ptr(projection));
+    } else {
+      glUseProgram(shader_id);
+      glUniformMatrix4fv(view_id, 1, GL_FALSE, glm::value_ptr(view));
+      glUniformMatrix4fv(projection_id, 1, GL_FALSE, glm::value_ptr(projection));
+    }
   } while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
            glfwWindowShouldClose(window) == 0);
 
@@ -159,7 +152,7 @@ int main() {
 
 	glDeleteBuffers(1, &vertex_buffer_id);
 	glDeleteVertexArrays(1, &vertex_array_id);
-	glDeleteProgram(programID);
+	glDeleteProgram(shader_id);
 
 	glfwTerminate();
 
