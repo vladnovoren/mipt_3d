@@ -115,47 +115,47 @@ int main() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices),
                vertices, GL_STATIC_DRAW);
 
+  glUseProgram(programID);
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
+
+  glUniformMatrix4fv(projection_id, 1, GL_FALSE, glm::value_ptr(projection));
+
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(
+    0,
+    3,
+    GL_FLOAT,
+    GL_FALSE,
+    sizeof(Vertex),
+    (void*)offsetof(Vertex, position)
+  );
+
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(
+    1,
+    4,
+    GL_FLOAT,
+    GL_FALSE,
+    sizeof(Vertex),
+    (void*)offsetof(Vertex, color)
+  );
+
   auto angle = 0.0f;
   auto dist = 10.0f;
   do {
     angle += 0.04f;
     view = glm::lookAt(glm::vec3(dist * std::cos(angle), 4, dist * std::sin(angle)), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glUseProgram(programID);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
-
     glUniformMatrix4fv(view_id, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projection_id, 1, GL_FALSE, glm::value_ptr(projection));
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-      0,
-      3,
-      GL_FLOAT,
-      GL_FALSE,
-      sizeof(Vertex),
-      (void*)offsetof(Vertex, position)
-    );
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-      1,
-      4,
-      GL_FLOAT,
-      GL_FALSE,
-      sizeof(Vertex),
-      (void*)offsetof(Vertex, color)
-    );
-
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(Vertex));
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
-
     glfwSwapBuffers(window);
     glfwPollEvents();
   } while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
            glfwWindowShouldClose(window) == 0);
+
+  glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
 
 	glDeleteBuffers(1, &vertex_buffer_id);
 	glDeleteVertexArrays(1, &vertex_array_id);
